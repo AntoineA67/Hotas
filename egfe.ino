@@ -36,10 +36,8 @@ int const buttonPins[buttonCount] = {
     TRIG_2};
 
 int lastButtonValue[buttonCount];
-int lastX1AxisValue = -1;
-int lastX2AxisValue = -1;
-int lastY1AxisValue = -1;
-int lastY2AxisValue = -1;
+int lastXAxisValue = -1;
+int lastYAxisValue = -1;
 int lastRxAxisValue = -1;
 int lastRyAxisValue = -1;
 
@@ -138,54 +136,38 @@ void loop() {
         }
     }
     bool sendUpdate = false;
+    int f = 0;
 
     if (currentY1AxisValue < y1.zero) {
-        int f = 1023 - (double)(currentY1AxisValue - y1.min) / (double)(y1.zero - y1.min) * 512;
-        if (f > 1023) {
-          f = 1023;
-        } else if (f < 0) {
-          f = 0;
-        }
-        // Serial.print(currentY1AxisValue);
-        // Serial.print("  <- y1  ");
-        // Serial.println(f);
-        controller.setYAxis(f);
+      f = 1023 - (double)(currentY1AxisValue - y1.min) / (double)(y1.zero - y1.min) * 512;
     } else {
-        int f = ((double)(currentY2AxisValue - y2.min) / (double)(y2.zero - y2.min) * 512);
-        if (f > 1023) {
-          f = 1023;
-        } else if (f < 0) {
-          f = 0;
-        }
-        // Serial.print(currentY2AxisValue);
-        // Serial.print("  <- y2  ");
-        // Serial.println(f);
-        controller.setYAxis(f);
+      f = ((double)(currentY2AxisValue - y2.min) / (double)(y2.zero - y2.min) * 512);
+    }
+    if (f > 1023) {
+      f = 1023;
+    } else if (f < 0) {
+      f = 0;
+    }
+    if (f != lastYAxisValue) {
+      controller.setYAxis(f);
+      lastYAxisValue = f;
+      sendUpdate = true;
     }
     if (currentX1AxisValue < x1.zero) {
-        int f = (double)(currentX1AxisValue - x1.min) / (double)(x1.zero - x1.min) * 512;
-        if (f > 1023) {
-          f = 1023;
-        } else if (f < 0) {
-          f = 0;
-        }
-        // Serial.print(currentX1AxisValue);
-        // Serial.print("  <- x1  ");
-        // Serial.println(f);
-        controller.setXAxis(f);
+      f = (double)(currentX1AxisValue - x1.min) / (double)(x1.zero - x1.min) * 512;
     } else {
-        int f = 1023 - ((double)(currentX2AxisValue - x2.min) / (double)(x2.zero - x2.min) * 512);
-        if (f > 1023) {
-          f = 1023;
-        } else if (f < 0) {
-          f = 0;
-        }
-        // Serial.print(currentX2AxisValue);
-        // Serial.print("  <- x2  ");
-        // Serial.println(f);
-        controller.setXAxis(f);
+      f = 1023 - ((double)(currentX2AxisValue - x2.min) / (double)(x2.zero - x2.min) * 512);
     }
-    sendUpdate = true;
+    if (f > 1023) {
+      f = 1023;
+    } else if (f < 0) {
+      f = 0;
+    }
+    if (f != lastXAxisValue) {
+      controller.setXAxis(f);
+      lastXAxisValue = f;
+      sendUpdate = true;
+    }
 
     for (int i = 0; i < buttonCount; i++)
     {
